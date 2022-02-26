@@ -4,6 +4,7 @@ import 'firebase-functions';
 import { AppModule } from './app.module';
 import * as firebaseAdmin from 'firebase-admin';
 import * as functions from 'firebase-functions';
+import { firebaseConfig } from './firebase/config';
 import * as express from 'express';
 
 const server = express();
@@ -16,7 +17,7 @@ export const createNestServer = async (expressInstance) => {
   );
 
   // Initialize the firebase admin app
-  firebaseAdmin.initializeApp();
+  firebaseAdmin.initializeApp(firebaseConfig);
 
   app.enableCors();
   // return app.init();
@@ -26,7 +27,7 @@ export const createNestServer = async (expressInstance) => {
 };
 
 createNestServer(server)
-  .then(() => console.log('Nest Ready : env is ', process.env.NODE_ENV))
+  .then(() => console.log('Nest Ready : env : ', process.env.NODE_ENV))
   .catch((error) => console.error('Nest broken', error));
 
 export const api = functions.region('asia-northeast3').https.onRequest(server);
