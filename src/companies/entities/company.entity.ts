@@ -5,22 +5,22 @@ import { CoreEntity } from 'src/common/entities/core.entity';
 @ObjectType()
 export class Company extends CoreEntity {
   @Field(() => String, { description: '사업자등록번호' })
-  businessNumber: string;
+  business_number: string;
 
   @Field(() => String, { description: '회사이름' })
-  companyName: string;
+  company_name: string;
 
   @Field(() => String, { description: '대표자성명' })
-  presidentName: string;
+  president_name: string;
 
   @Field(() => String, { description: '개업일자' })
-  openingDate: string;
+  opening_date: string;
 
   @Field(() => String, { description: '사업자등록증' })
-  businessLicence: string;
+  business_licence: string;
 
   @Field(() => Boolean)
-  isValid: boolean;
+  is_valid: boolean;
 
   @Field()
   uid: string;

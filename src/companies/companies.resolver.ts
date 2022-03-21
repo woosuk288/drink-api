@@ -42,7 +42,7 @@ export class CompaniesResolver {
   }
 
   @Role(['Login'])
-  @Mutation(() => Company)
+  @Mutation(() => String)
   removeCompany(@AuthUser() token: DecodedIdToken) {
     return this.companiesService.remove(token);
   }

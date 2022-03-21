@@ -10,8 +10,8 @@ export class CoreEntity {
    */
 
   @Field()
-  createdAt: Date;
+  created_at?: Date;
 
   @Field()
-  updatedAt: Date;
+  updated_at?: Date;
 }

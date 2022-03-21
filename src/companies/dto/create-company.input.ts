@@ -4,8 +4,8 @@ import { Company } from '../entities/company.entity';
 @InputType()
 export class CreateCompanyInput extends OmitType(Company, [
   'id',
-  'createdAt',
-  'updatedAt',
-  'isValid',
+  'created_at',
+  'updated_at',
+  'is_valid',
   'uid',
 ]) {}

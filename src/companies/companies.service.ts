@@ -27,8 +27,6 @@ export class CompaniesService {
   ): Promise<CompanyOutput> {
     const c = getFirestore().collection(COMPANNIES);
 
-    console.log('token: ', token);
-
     try {
       // const snaps = await c.where('uid', '==', token.uid).limit(1).get();
       // // 실행되서는 안되는 코드 (추후 동일한 아이디로 사업자 2개 등록 해야할 경우엔 로직 변경 필요)
@@ -40,7 +38,7 @@ export class CompaniesService {
 
       //
       const snaps2 = await c
-        .where('businessNumber', '==', createCompanyInput.businessNumber)
+        .where('business_number', '==', createCompanyInput.business_number)
         .limit(1)
         .get();
 
@@ -53,18 +51,18 @@ export class CompaniesService {
       const company: Company = {
         ...createCompanyInput,
         ...CREATE(),
-        isValid: false,
+        is_valid: false,
         uid: token.uid,
       };
 
       const dataForValidation = {
         businesses: [
           {
-            b_no: createCompanyInput.businessNumber,
-            start_dt: createCompanyInput.openingDate,
-            p_nm: createCompanyInput.presidentName,
+            b_no: createCompanyInput.business_number,
+            start_dt: createCompanyInput.opening_date,
+            p_nm: createCompanyInput.president_name,
             p_nm2: '',
-            b_nm: createCompanyInput.companyName,
+            b_nm: createCompanyInput.company_name,
             corp_no: '',
             b_sector: '',
             b_type: '',
@@ -74,10 +72,10 @@ export class CompaniesService {
 
       const r = await axios.post(URL, dataForValidation);
       if (r.data.valid_cnt === 1) {
-        company.isValid = true;
+        company.is_valid = true;
       } else {
         const userRecord = await getAuth().getUser(token.uid);
-        const errorCount = (userRecord.customClaims['error'] ?? 0) + 1;
+        const errorCount = (userRecord.customClaims?.error ?? 0) + 1;
         // const error = '시도 횟수를 초과했습니다.';
         const error =
           errorCount < 3
@@ -113,7 +111,7 @@ export class CompaniesService {
     return `This action returns a #${id} company`;
   }
 
-  update(id: number, updateCompanyInput: UpdateCompanyInput) {
+  async update(id: number, updateCompanyInput: UpdateCompanyInput) {
     return `This action updates a #${id} company`;
   }
 
@@ -122,7 +120,7 @@ export class CompaniesService {
 
     console.log(userRecord.customClaims);
 
-    // await getAuth().setCustomUserClaims(token.uid, { error: undefined });
+    // await getAuth().setCustomUserClaims(token.uid, null);
     return `This action removes a #${token.uid} company`;
   }
 }
