@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { CommonModule } from './common/common.module';
 import { CompaniesModule } from './companies/companies.module';
 import { UploadModule } from './upload/upload.module';
+import { BookmarksModule } from './bookmarks/bookmarks.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { UploadModule } from './upload/upload.module';
     CommonModule,
     CompaniesModule,
     UploadModule,
+    BookmarksModule,
   ],
   controllers: [AppController],
   providers: [AppService],
