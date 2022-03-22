@@ -10,6 +10,7 @@ import { CompanyOutput } from './dto/company.output';
 import axios from 'axios';
 import { DecodedIdToken } from 'firebase-admin/lib/auth/token-verifier';
 import { getAuth } from 'firebase-admin/auth';
+import { UserRole } from 'src/auth/roles.decorator';
 
 const COMPANNIES = 'companies';
 /**
@@ -93,7 +94,7 @@ export class CompaniesService {
       await getAuth().setCustomUserClaims(token.uid, { Company: true });
 
       console.log('company : ', company);
-      return { ok: true, company, role: 'Company' };
+      return { ok: true, company, role: UserRole.Company };
     } catch (error) {
       console.log(error);
       return {
