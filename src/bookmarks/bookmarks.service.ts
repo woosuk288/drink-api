@@ -25,8 +25,11 @@ export class BookmarksService {
         return { ok: false, error: '이미 추가되었습니다.' };
       }
 
-      await b.add({ ...createBookmarkInput, ...CREATE(), uid });
-      return { ok: true };
+      const data = { ...createBookmarkInput, ...CREATE(), uid };
+      const newBookmark = await b.add(data);
+      data.id = newBookmark.id;
+
+      return { ok: true, bookmark: data };
     } catch (error) {
       console.log('error: ', error);
       return { ok: false, error: '추가하는 중 오류 발생!' };

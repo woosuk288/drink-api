@@ -7,3 +7,9 @@ export class BookmarksOutput extends CoreOutput {
   @Field(() => [Bookmark], { nullable: true })
   bookmarks?: Bookmark[];
 }
+
+@ObjectType()
+export class CreateBookmarkOutput extends CoreOutput {
+  @Field(() => Bookmark, { nullable: true })
+  bookmark?: Bookmark;
+}

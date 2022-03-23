@@ -3,7 +3,7 @@ import { BookmarksService } from './bookmarks.service';
 import { Bookmark } from './entities/bookmark.entity';
 import { CreateBookmarkInput } from './dto/create-bookmark.input';
 import { CoreOutput } from 'src/common/dtos/core.dto';
-import { BookmarksOutput } from './dto/bookmark.output';
+import { BookmarksOutput, CreateBookmarkOutput } from './dto/bookmark.output';
 import { AuthUser } from 'src/auth/auth-user.decorator';
 import { DecodedIdToken } from 'firebase-admin/auth';
 import { Role } from 'src/auth/roles.decorator';
@@ -13,7 +13,7 @@ export class BookmarksResolver {
   constructor(private readonly bookmarksService: BookmarksService) {}
 
   @Role(['Login'])
-  @Mutation(() => CoreOutput)
+  @Mutation(() => CreateBookmarkOutput)
   createBookmark(
     @AuthUser() token: DecodedIdToken,
     @Args('input') createBookmarkInput: CreateBookmarkInput,
