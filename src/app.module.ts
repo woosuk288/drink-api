@@ -7,6 +7,7 @@ import { CommonModule } from './common/common.module';
 import { CompaniesModule } from './companies/companies.module';
 import { UploadModule } from './upload/upload.module';
 import { BookmarksModule } from './bookmarks/bookmarks.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { BookmarksModule } from './bookmarks/bookmarks.module';
     CompaniesModule,
     UploadModule,
     BookmarksModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
