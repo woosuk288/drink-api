@@ -1,15 +1,16 @@
 import { ObjectType, Field, InputType } from '@nestjs/graphql';
+import { CoreEntity } from 'src/common/entities/core.entity';
 
-@InputType('NotificationInput')
+@InputType('NotificationEntityInput')
 @ObjectType()
-export class Notification {
+export class Notification extends CoreEntity {
   @Field({ description: '상품 id' })
   product_id: string;
 
   @Field({ description: '메시지' })
   message: string;
 
-  @Field(() => [String], { nullable: true })
+  @Field(() => [String])
   etc: string[];
 
   @Field({ description: '받는이' })

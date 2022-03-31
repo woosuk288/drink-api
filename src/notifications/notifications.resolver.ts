@@ -7,6 +7,11 @@ import { Role } from 'src/auth/roles.decorator';
 import { CoreOutput } from 'src/common/dtos/core.dto';
 import { DecodedIdToken } from 'firebase-admin/auth';
 import { AuthUser } from 'src/auth/auth-user.decorator';
+import {
+  NotificationOutput,
+  NotificationsOutput,
+} from './dto/notification.output';
+import { NotificationInput } from './dto/notification.input';
 
 @Resolver(() => Notification)
 export class NotificationsResolver {
@@ -21,25 +26,28 @@ export class NotificationsResolver {
     return this.notificationsService.create(token, createNotificationInput);
   }
 
-  @Query(() => [Notification], { name: 'notifications' })
-  findAll() {
-    return this.notificationsService.findAll();
+  @Role(['Login'])
+  @Query(() => NotificationsOutput, { name: 'notifications' })
+  findAll(@AuthUser() token: DecodedIdToken) {
+    return this.notificationsService.findAll(token);
   }
 
-  @Query(() => Notification, { name: 'notification' })
-  findOne(@Args('id', { type: () => Int }) id: number) {
-    return this.notificationsService.findOne(id);
+  @Role(['Login'])
+  @Query(() => NotificationOutput, { name: 'notification' })
+  findOne(
+    @AuthUser() token: DecodedIdToken,
+    @Args('input') notificationInput: NotificationInput,
+  ) {
+    return this.notificationsService.findOne(token, notificationInput);
   }
 
-  @Mutation(() => Notification)
+  @Mutation(() => CoreOutput)
   updateNotification(
-    @Args('updateNotificationInput')
+    @AuthUser() token: DecodedIdToken,
+    @Args('input')
     updateNotificationInput: UpdateNotificationInput,
   ) {
-    return this.notificationsService.update(
-      updateNotificationInput.id,
-      updateNotificationInput,
-    );
+    return this.notificationsService.update(token, updateNotificationInput);
   }
 
   @Mutation(() => Notification)

@@ -1,4 +1,4 @@
-import { InputType, Int, Field } from '@nestjs/graphql';
+import { InputType } from '@nestjs/graphql';
 import { Notification } from '../entities/notification.entity';
 
 @InputType()
