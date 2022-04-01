@@ -1,5 +1,7 @@
 import { Post, Req, Request } from '@nestjs/common';
 import { Controller } from '@nestjs/common';
+import { DecodedIdToken } from 'firebase-admin/auth';
+import { AuthUser } from 'src/auth/auth-user.decorator';
 import { Role } from 'src/auth/roles.decorator';
 import { FileInterceptorService } from './file-interceptor-service';
 import { FileSaverService } from './file-saver.service';
@@ -7,7 +9,7 @@ import { FileSaverService } from './file-saver.service';
 // TODO: Role 처리하기 @AuthUser() token: DecodedIdToken
 // buisniess license uid값 앞에 추가
 // customClaims에 error 있으면 업로드 불가하게
-@Role(['Login'])
+
 @Controller('upload')
 export class UploadController {
   constructor(
@@ -15,11 +17,14 @@ export class UploadController {
     private fileInterceptorService: FileInterceptorService,
   ) {}
 
+  @Role(['Login'])
   @Post('')
-  async uploadFile(@Req() req: Request) {
+  async uploadFile(@AuthUser() token: DecodedIdToken, @Req() req: Request) {
+    // console.log('req.headers : ', req.headers);
+
     const { files, fields } =
       await this.fileInterceptorService.interceptRequest(req, {
-        fileUniqueId: new Date().toLocaleString(),
+        fileUniqueId: token.uid + '-' + new Date().toLocaleDateString(),
       });
 
     // console.log('files: ', files);

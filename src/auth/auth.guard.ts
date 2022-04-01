@@ -1,8 +1,16 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import {
+  CanActivate,
+  ContextType,
+  ExecutionContext,
+  Injectable,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { Observable } from 'rxjs';
 import { getAuth } from 'firebase-admin/auth';
+import { Request } from 'express';
+
+type CustomContextType = ContextType & 'graphql';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -19,8 +27,15 @@ export class AuthGuard implements CanActivate {
 
     const gqlContext = GqlExecutionContext.create(context).getContext();
 
-    const token: string =
-      gqlContext.req.headers.authorization?.split('Bearer ')[1];
+    let token = '';
+
+    if (context.getType<CustomContextType>() === 'graphql') {
+      token = gqlContext.req.headers.authorization?.split('Bearer ')[1];
+    } else if (context.getType() === 'http') {
+      const request = context.switchToHttp().getRequest<Request>();
+      token = request.headers.authorization;
+    } else {
+    }
 
     // 아무나 + 유저정보 필요할 때
     if (roles.includes('Any')) {
