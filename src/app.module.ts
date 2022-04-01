@@ -8,6 +8,7 @@ import { CompaniesModule } from './companies/companies.module';
 import { UploadModule } from './upload/upload.module';
 import { BookmarksModule } from './bookmarks/bookmarks.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { CoffeesModule } from './coffees/coffees.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { NotificationsModule } from './notifications/notifications.module';
     UploadModule,
     BookmarksModule,
     NotificationsModule,
+    CoffeesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
