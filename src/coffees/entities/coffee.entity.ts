@@ -1,5 +1,4 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
-import { DocumentReference } from 'firebase-admin/firestore';
 
 @ObjectType()
 export class Coffee {

@@ -1,16 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { DecodedIdToken } from 'firebase-admin/auth';
-import { getFirestore } from 'firebase-admin/firestore';
-import { getStorage } from 'firebase-admin/storage';
+import { DocumentReference, getFirestore } from 'firebase-admin/firestore';
+import { Coffee } from 'src/coffees/entities/coffee.entity';
+import {
+  COFFEES,
+  COMPANIES,
+  NOTIFICATIONS,
+  USERS,
+} from 'src/common/common.constants';
+import { User } from 'src/common/entities/user.entity';
 import { Company } from 'src/companies/entities/company.entity';
+import { getAsyncData, getData } from 'src/firebase/util';
 import { CreateNotificationInput } from './dto/create-notification.input';
 import { NotificationInput } from './dto/notification.input';
 import { UpdateNotificationInput } from './dto/update-notification.input';
 import { Notification } from './entities/notification.entity';
-
-const NOTIFICATIONS = 'notifications';
-const COMPANIES = 'companies';
-// const USERS = 'users';
 
 @Injectable()
 export class NotificationsService {
@@ -18,12 +22,28 @@ export class NotificationsService {
     token: DecodedIdToken,
     createNotificationInput: CreateNotificationInput,
   ) {
-    try {
-      const c = getFirestore().collection(NOTIFICATIONS);
+    const { product_id, type } = createNotificationInput;
 
-      const snaps = await c
-        .where('sender_id', '==', token.uid)
-        .where('product_id', '==', createNotificationInput.product_id)
+    try {
+      const C = getFirestore().collection(COFFEES);
+      let coffee: Coffee;
+      if (type === 'coffee') {
+        coffee = await getAsyncData<Coffee>(C.doc(product_id));
+      } else {
+        return { ok: false, error: '찾을 상품의 종류가 없습니다.' };
+      }
+      // const coffee = await getAsyncData<Coffee>(C.doc(product_id));
+      const recipientCompanyRef =
+        coffee.company as unknown as DocumentReference;
+
+      const U = getFirestore().collection(USERS);
+      const user = await getAsyncData<User>(U.doc(token.uid));
+      const senderCompanyRef = user.company as unknown as DocumentReference;
+
+      const N = getFirestore().collection(NOTIFICATIONS);
+
+      const snaps = await N.where('sender_id', '==', senderCompanyRef.id)
+        .where('product_id', '==', product_id)
         .limit(1)
         .get();
 
@@ -31,7 +51,14 @@ export class NotificationsService {
         return { ok: false, error: '이미 요청 했습니다.' };
       }
 
-      await c.add(createNotificationInput);
+      const newNotification = {
+        ...createNotificationInput,
+        recipient_id: recipientCompanyRef.id,
+        sender_id: senderCompanyRef.id,
+        read: false,
+      };
+
+      await N.add(newNotification);
 
       return { ok: true };
     } catch (error) {
@@ -41,37 +68,25 @@ export class NotificationsService {
 
   async findAll(token: DecodedIdToken) {
     try {
+      const U = getFirestore().collection(USERS);
+      const user = await getAsyncData<User>(U.doc(token.uid));
+      const userCompanyRef = user.company as unknown as DocumentReference;
+
       const c = getFirestore().collection(NOTIFICATIONS);
 
       const senderSnaps = await c
-        .where('sender_id', '==', token.uid)
+        .where('sender_id', '==', userCompanyRef.id)
         .limit(10)
         .get();
       const recipientSnaps = await c
-        .where('recipient_id', '==', token.uid)
+        .where('recipient_id', '==', userCompanyRef.id)
         .limit(10)
         .get();
 
       const notifications = [
-        ...senderSnaps.docs.map(
-          (d) =>
-            ({
-              id: d.id,
-              ...d.data(),
-              created_at: d.createTime.toDate(),
-            } as Notification),
-        ),
-        ...recipientSnaps.docs.map(
-          (d) =>
-            ({
-              id: d.id,
-              ...d.data(),
-              created_at: d.createTime.toDate(),
-            } as Notification),
-        ),
+        ...senderSnaps.docs.map((doc) => getData<Notification>(doc)),
+        ...recipientSnaps.docs.map((doc) => getData<Notification>(doc)),
       ].sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
-
-      console.log('notifications : ', notifications);
 
       return { ok: true, notifications };
     } catch (error) {
@@ -82,6 +97,10 @@ export class NotificationsService {
   async findOne(token: DecodedIdToken, notificationInput: NotificationInput) {
     const { id } = notificationInput;
 
+    const U = getFirestore().collection(USERS);
+    const user = await getAsyncData<User>(U.doc(token.uid));
+    const senderCompanyRef = user.company as unknown as DocumentReference;
+
     try {
       const notiRef = await getFirestore()
         .collection(NOTIFICATIONS)
@@ -89,7 +108,12 @@ export class NotificationsService {
         .get();
 
       const noti = notiRef.data() as Notification;
-      if (!(token.uid === noti.sender_id || token.uid === noti.recipient_id)) {
+      if (
+        !(
+          senderCompanyRef.id === noti.sender_id ||
+          senderCompanyRef.id === noti.recipient_id
+        )
+      ) {
         return { ok: false, error: '해당 알림을 볼 수 없습니다.' };
       }
 
@@ -107,46 +131,32 @@ export class NotificationsService {
         return { ok: false, error: '찾을 상품의 종류가 없습니다.' };
       }
 
-      const file = await getStorage().bucket().file(docRef.data().main_image);
-      const [metadata] = await file.getMetadata();
-      const url = metadata.mediaLink;
-
       const product = {
         id: docRef.id,
         title: docRef.data().name,
-        image: url,
+        image: docRef.data().main_image,
       };
 
-      const senderSnaps = await getFirestore()
-        .collection(COMPANIES)
-        .where('uid', '==', noti.sender_id)
-        .limit(1)
-        .get();
-      const sCompany = senderSnaps.docs[0].data() as Company;
+      const sender = await getAsyncData<Company>(
+        getFirestore().collection(COMPANIES).doc(noti.sender_id),
+      );
 
-      const recipientSnaps = await getFirestore()
-        .collection(COMPANIES)
-        .where('uid', '==', noti.recipient_id)
-        .limit(1)
-        .get();
-      const rCompany = recipientSnaps.docs[0].data() as Company;
+      const recipient = await getAsyncData<Company>(
+        getFirestore().collection(COMPANIES).doc(noti.recipient_id),
+      );
 
       const senderCompany = {
-        id: senderSnaps.docs[0].id,
-        company_name: sCompany.company_name,
-        president_name: sCompany.president_name,
-        telephone: '0101234',
+        id: sender.id,
+        company_name: sender.company_name,
+        president_name: sender.president_name,
+        telephone: sender.telephone,
       };
       const recipientCompany = {
-        id: recipientSnaps.docs[0].id,
-        company_name: rCompany.company_name,
-        president_name: rCompany.president_name,
-        telephone: '0105678',
+        id: recipient.id,
+        company_name: recipient.company_name,
+        president_name: recipient.president_name,
+        telephone: recipient.telephone,
       };
-
-      console.log('product : ', product);
-      console.log('senderCompany : ', senderCompany);
-      console.log('recipientCompany : ', recipientCompany);
 
       return { ok: true, product, senderCompany, recipientCompany };
     } catch (error) {

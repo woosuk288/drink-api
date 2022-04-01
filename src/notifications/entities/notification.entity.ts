@@ -10,8 +10,8 @@ export class Notification extends CoreEntity {
   @Field({ description: '메시지' })
   message: string;
 
-  @Field(() => [String])
-  etc: string[];
+  // @Field(() => [String])
+  // etc: string[];
 
   @Field({ description: '받는이' })
   recipient_id: string;
@@ -22,6 +22,6 @@ export class Notification extends CoreEntity {
   @Field(() => Boolean, { description: '읽음' })
   read: boolean;
 
-  @Field({ description: 'DB' })
+  @Field({ description: '상품 유형' })
   type: string;
 }

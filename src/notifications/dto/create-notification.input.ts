@@ -1,5 +1,9 @@
-import { InputType } from '@nestjs/graphql';
+import { InputType, PickType } from '@nestjs/graphql';
 import { Notification } from '../entities/notification.entity';
 
 @InputType()
-export class CreateNotificationInput extends Notification {}
+export class CreateNotificationInput extends PickType(Notification, [
+  'product_id',
+  'message',
+  'type',
+]) {}

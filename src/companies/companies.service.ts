@@ -99,7 +99,9 @@ export class CompaniesService {
       // 사업자 생성
       const newCompanyRef = await c.add(company);
       company.id = newCompanyRef.id;
-      await getAuth().setCustomUserClaims(token.uid, { Company: true });
+      await getAuth().setCustomUserClaims(token.uid, {
+        Company: newCompanyRef.id,
+      });
 
       u.doc(token.uid).update({ company: newCompanyRef });
 
@@ -118,7 +120,7 @@ export class CompaniesService {
     return `This action returns all companies`;
   }
 
-  findOne(id: number) {
+  async findOne(id: number) {
     return `This action returns a #${id} company`;
   }
 
