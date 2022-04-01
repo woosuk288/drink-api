@@ -52,10 +52,18 @@ export class CompaniesService {
         return { ok: false, error };
       }
 
+      const u = getFirestore().collection(USERS);
+      const userDoc = await u.doc(token.uid).get();
+      const errorCount = (userDoc.data().errorCount ?? 0) + 1;
+
+      if (errorCount >= 3) {
+        await u.doc(token.uid).update({ errorCount });
+        return { ok: false, error: '시도 횟수를 초과했습니다.' };
+      }
+
       const company: Company = {
         ...createCompanyInput,
         ...CREATE(),
-        is_valid: false,
         uid: token.uid,
       };
 
@@ -76,29 +84,24 @@ export class CompaniesService {
 
       const r = await axios.post(URL, dataForValidation);
       // console.log('r.data : ', r.data);
-      const u = getFirestore().collection(USERS);
 
-      if (r.data.valid_cnt === 1) {
-        company.is_valid = true;
-      } else {
-        const userDoc = await u.doc(token.uid).get();
-        const errorCount = (userDoc.data().errorCount ?? 0) + 1;
-        // const error = '시도 횟수를 초과했습니다.';
-        const error =
-          errorCount < 3
-            ? '사업자 정보 입력이 정확하지 않습니다. \n남은 횟수 : ' +
-              (3 - errorCount)
-            : '시도 횟수를 초과했습니다.';
-
+      if (r.data.valid_cnt !== 1) {
+        // count ++
         await u.doc(token.uid).update({ errorCount });
-
-        return { ok: false, error };
+        return {
+          ok: false,
+          error:
+            '사업자 정보 입력이 정확하지 않습니다. \n남은 횟수 : ' +
+            (3 - errorCount),
+        };
       }
 
       // 사업자 생성
       const newCompanyRef = await c.add(company);
       company.id = newCompanyRef.id;
       await getAuth().setCustomUserClaims(token.uid, { Company: true });
+
+      u.doc(token.uid).update({ company: newCompanyRef });
 
       console.log('company : ', company);
       return { ok: true, company, role: UserRole.Company };

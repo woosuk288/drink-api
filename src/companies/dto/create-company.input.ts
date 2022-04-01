@@ -6,6 +6,5 @@ export class CreateCompanyInput extends OmitType(Company, [
   'id',
   'created_at',
   'updated_at',
-  'is_valid',
   'uid',
 ]) {}
