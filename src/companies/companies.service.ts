@@ -13,6 +13,7 @@ import { getAuth } from 'firebase-admin/auth';
 import { UserRole } from 'src/auth/roles.decorator';
 
 const COMPANNIES = 'companies';
+const USERS = 'users';
 /**
  * 사업자 진위확인
  * https://www.data.go.kr/iim/api/selectAPIAcountView.do#/%EC%82%AC%EC%97%85%EC%9E%90%EB%93%B1%EB%A1%9D%EC%A0%95%EB%B3%B4%20%EC%A7%84%EC%9C%84%ED%99%95%EC%9D%B8%20API/validate
@@ -26,6 +27,8 @@ export class CompaniesService {
     token: DecodedIdToken,
     createCompanyInput: CreateCompanyInput,
   ): Promise<CompanyOutput> {
+    // console.log('createCompanyInput : ', createCompanyInput);
+
     const c = getFirestore().collection(COMPANNIES);
 
     try {
@@ -72,18 +75,22 @@ export class CompaniesService {
       };
 
       const r = await axios.post(URL, dataForValidation);
+      // console.log('r.data : ', r.data);
+      const u = getFirestore().collection(USERS);
+
       if (r.data.valid_cnt === 1) {
         company.is_valid = true;
       } else {
-        const userRecord = await getAuth().getUser(token.uid);
-        const errorCount = (userRecord.customClaims?.error ?? 0) + 1;
+        const userDoc = await u.doc(token.uid).get();
+        const errorCount = (userDoc.data().errorCount ?? 0) + 1;
         // const error = '시도 횟수를 초과했습니다.';
         const error =
           errorCount < 3
             ? '사업자 정보 입력이 정확하지 않습니다. \n남은 횟수 : ' +
               (3 - errorCount)
             : '시도 횟수를 초과했습니다.';
-        await getAuth().setCustomUserClaims(token.uid, { error: errorCount });
+
+        await u.doc(token.uid).update({ errorCount });
 
         return { ok: false, error };
       }

@@ -19,6 +19,9 @@ export class Company extends CoreEntity {
   @Field(() => String, { description: '사업자등록증' })
   business_licence: string;
 
+  @Field(() => String, { description: '전화번호(회사)' })
+  telephone: string;
+
   @Field(() => Boolean)
   is_valid: boolean;
 
