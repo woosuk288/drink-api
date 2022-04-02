@@ -9,6 +9,7 @@ import { UploadModule } from './upload/upload.module';
 import { BookmarksModule } from './bookmarks/bookmarks.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { CoffeesModule } from './coffees/coffees.module';
+import { PostsModule } from './posts/posts.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { CoffeesModule } from './coffees/coffees.module';
     BookmarksModule,
     NotificationsModule,
     CoffeesModule,
+    PostsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

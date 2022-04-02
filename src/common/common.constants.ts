@@ -8,6 +8,7 @@ export const BUCKET_NAME = 'foodoverflow-bca6d.appspot.com';
 /**
  * firebase collections
  */
+export const BLOG = 'blog';
 export const COFFEES = 'coffees';
 export const NOTIFICATIONS = 'notifications';
 export const COMPANIES = 'companies';
