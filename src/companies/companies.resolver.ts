@@ -33,13 +33,8 @@ export class CompaniesResolver {
   }
 
   @Mutation(() => Company)
-  updateCompany(
-    @Args('updateCompanyInput') updateCompanyInput: UpdateCompanyInput,
-  ) {
-    return this.companiesService.update(
-      updateCompanyInput.id,
-      updateCompanyInput,
-    );
+  updateCompany(@Args('input') updateCompanyInput: UpdateCompanyInput) {
+    return this.companiesService.update(updateCompanyInput.id);
   }
 
   @Role(['Login'])

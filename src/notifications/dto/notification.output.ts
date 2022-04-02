@@ -10,7 +10,7 @@ export class NotificationsOutput extends CoreOutput {
 }
 
 @ObjectType()
-class NotiProduct {
+export class NotiProduct {
   @Field()
   id: string;
 
@@ -22,7 +22,7 @@ class NotiProduct {
 }
 
 @ObjectType()
-class NotiCompany extends PickType(
+export class NotiCompany extends PickType(
   Company,
   ['id', 'company_name', 'president_name'],
   ObjectType,

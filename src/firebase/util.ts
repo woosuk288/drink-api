@@ -1,19 +1,44 @@
 import { getFirestore } from 'firebase-admin/firestore';
 
-export function getAsync<T>(
-  ref: FirebaseFirestore.DocumentReference<FirebaseFirestore.DocumentData>,
-): Promise<T> {
-  return ref
+/**
+ * Get a document data
+ * @param collectionName
+ * @param documentId
+ * @returns T | null
+ */
+export function getD<T>(
+  collectionName: string,
+  documentId: string,
+): Promise<T | null> {
+  return getFirestore()
+    .collection(collectionName)
+    .doc(documentId)
     .get()
-    .then((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-      updated_at: doc.updateTime.toDate(),
-      created_at: doc.createTime.toDate(),
-    }))
-    .catch((reason) => {
-      return reason;
+    .then((doc) => {
+      if (doc.exists) {
+        return getData<T | null>(doc);
+      } else {
+        return null;
+      }
     });
+}
+
+/**
+ * Get Data by DocumentReference
+ * @param ref DocumentReference
+ * @returns T | null
+ */
+
+export function getByRef<T>(
+  ref: FirebaseFirestore.DocumentReference<FirebaseFirestore.DocumentData>,
+): Promise<T | null> {
+  return ref.get().then((doc) => {
+    if (doc.exists) {
+      return getData<T | null>(doc);
+    } else {
+      return null;
+    }
+  });
 }
 
 export function getData<T>(

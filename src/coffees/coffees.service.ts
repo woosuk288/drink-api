@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { COFFEES } from 'src/common/common.constants';
-import { C_, getArray, getAsync } from 'src/firebase/util';
+import { C_, getArray, getD } from 'src/firebase/util';
 import { Coffee } from './entities/coffee.entity';
 
 @Injectable()
@@ -22,7 +22,7 @@ export class CoffeesService {
 
   async findOne(id: string) {
     try {
-      const coffee = await getAsync<Coffee>(C_(COFFEES).doc(id));
+      const coffee = await getD<Coffee>(COFFEES, id);
 
       return { ok: true, coffee };
     } catch (error) {

@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { CreateCompanyInput } from './dto/create-company.input';
-import { UpdateCompanyInput } from './dto/update-company.input';
 
 // import { db } from 'src/firebase/firebase.module';
 import { getFirestore } from 'firebase-admin/firestore';
@@ -10,9 +9,9 @@ import axios from 'axios';
 import { DecodedIdToken } from 'firebase-admin/lib/auth/token-verifier';
 import { getAuth } from 'firebase-admin/auth';
 import { UserRole } from 'src/auth/roles.decorator';
-import { CREATE, C_, getAsync } from 'src/firebase/util';
+import { CREATE, getD } from 'src/firebase/util';
+import { COMPANIES } from 'src/common/common.constants';
 
-const COMPANNIES = 'companies';
 const USERS = 'users';
 /**
  * 사업자 진위확인
@@ -29,7 +28,7 @@ export class CompaniesService {
   ): Promise<CompanyOutput> {
     // console.log('createCompanyInput : ', createCompanyInput);
 
-    const c = getFirestore().collection(COMPANNIES);
+    const c = getFirestore().collection(COMPANIES);
 
     try {
       // const snaps = await c.where('uid', '==', token.uid).limit(1).get();
@@ -122,9 +121,7 @@ export class CompaniesService {
 
   async findOne(token: DecodedIdToken) {
     try {
-      const company = await getAsync<Company>(
-        C_(COMPANNIES).doc(token.Company),
-      );
+      const company = await getD<Company>(COMPANIES, token.Company);
 
       return { ok: true, company, UserRole: UserRole.Company };
     } catch (error) {
@@ -132,7 +129,7 @@ export class CompaniesService {
     }
   }
 
-  async update(id: number, updateCompanyInput: UpdateCompanyInput) {
+  async update(id: string) {
     return `This action updates a #${id} company`;
   }
 

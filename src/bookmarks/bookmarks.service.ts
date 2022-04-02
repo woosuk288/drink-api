@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { DecodedIdToken } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
-import { CREATE } from 'src/firebase/util';
+import { CREATE, C_, getArray } from 'src/firebase/util';
 
 import { CreateBookmarkInput } from './dto/create-bookmark.input';
+import { Bookmark } from './entities/bookmark.entity';
 
 const BOOKMARKS = 'bookmarks';
 
@@ -39,10 +40,8 @@ export class BookmarksService {
 
   async findAll(token: DecodedIdToken) {
     try {
-      const b = getFirestore().collection(BOOKMARKS);
-      const qs = await b.where('uid', '==', token.uid).get();
-
-      const bookmarks = qs.docs.map((d) => ({ id: d.id, ...d.data() }));
+      const qs = await C_(BOOKMARKS).where('uid', '==', token.uid).get();
+      const bookmarks = getArray<Bookmark>(qs);
 
       return { ok: true, bookmarks };
     } catch (error) {

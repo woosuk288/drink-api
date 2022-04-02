@@ -10,9 +10,10 @@ import {
 } from 'src/common/common.constants';
 import { User } from 'src/common/entities/user.entity';
 import { Company } from 'src/companies/entities/company.entity';
-import { getAsync, getData } from 'src/firebase/util';
+import { C_, getArray, getD, getData } from 'src/firebase/util';
 import { CreateNotificationInput } from './dto/create-notification.input';
 import { NotificationInput } from './dto/notification.input';
+import { NotiCompany, NotiProduct } from './dto/notification.output';
 import { UpdateNotificationInput } from './dto/update-notification.input';
 import { Notification } from './entities/notification.entity';
 
@@ -25,24 +26,17 @@ export class NotificationsService {
     const { product_id, type } = createNotificationInput;
 
     try {
-      const C = getFirestore().collection(COFFEES);
       let coffee: Coffee;
       if (type === 'coffee') {
-        coffee = await getAsync<Coffee>(C.doc(product_id));
+        coffee = await getD<Coffee>(COFFEES, product_id);
       } else {
         return { ok: false, error: '찾을 상품의 종류가 없습니다.' };
       }
       // const coffee = await getAsyncData<Coffee>(C.doc(product_id));
-      const recipientCompanyRef =
-        coffee.company as unknown as DocumentReference;
-
-      const U = getFirestore().collection(USERS);
-      const user = await getAsync<User>(U.doc(token.uid));
-      const senderCompanyRef = user.company as unknown as DocumentReference;
 
       const N = getFirestore().collection(NOTIFICATIONS);
 
-      const snaps = await N.where('sender_id', '==', senderCompanyRef.id)
+      const snaps = await N.where('sender_id', '==', token.Company)
         .where('product_id', '==', product_id)
         .limit(1)
         .get();
@@ -53,8 +47,8 @@ export class NotificationsService {
 
       const newNotification = {
         ...createNotificationInput,
-        recipient_id: recipientCompanyRef.id,
-        sender_id: senderCompanyRef.id,
+        recipient_id: coffee.company_id,
+        sender_id: token.Company,
         read: false,
       };
 
@@ -68,24 +62,21 @@ export class NotificationsService {
 
   async findAll(token: DecodedIdToken) {
     try {
-      const U = getFirestore().collection(USERS);
-      const user = await getAsync<User>(U.doc(token.uid));
+      const user = await getD<User>(USERS, token.uid);
       const userCompanyRef = user.company as unknown as DocumentReference;
 
-      const c = getFirestore().collection(NOTIFICATIONS);
-
-      const senderSnaps = await c
+      const senderSnaps = await C_(NOTIFICATIONS)
         .where('sender_id', '==', userCompanyRef.id)
         .limit(10)
         .get();
-      const recipientSnaps = await c
+      const recipientSnaps = await C_(NOTIFICATIONS)
         .where('recipient_id', '==', userCompanyRef.id)
         .limit(10)
         .get();
 
       const notifications = [
-        ...senderSnaps.docs.map((doc) => getData<Notification>(doc)),
-        ...recipientSnaps.docs.map((doc) => getData<Notification>(doc)),
+        ...getArray<Notification>(senderSnaps),
+        ...getArray<Notification>(recipientSnaps),
       ].sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
 
       return { ok: true, notifications };
@@ -97,61 +88,47 @@ export class NotificationsService {
   async findOne(token: DecodedIdToken, notificationInput: NotificationInput) {
     const { id } = notificationInput;
 
-    const U = getFirestore().collection(USERS);
-    const user = await getAsync<User>(U.doc(token.uid));
-    const senderCompanyRef = user.company as unknown as DocumentReference;
+    if (!token.Company) {
+      return { ok: false, error: '사업자가 아닙니다.' };
+    }
 
     try {
-      const notiRef = await getFirestore()
-        .collection(NOTIFICATIONS)
-        .doc(id)
-        .get();
+      const noti = await getD<Notification>(NOTIFICATIONS, id);
 
-      const noti = notiRef.data() as Notification;
       if (
         !(
-          senderCompanyRef.id === noti.sender_id ||
-          senderCompanyRef.id === noti.recipient_id
+          token.Company === noti.sender_id ||
+          token.Company === noti.recipient_id
         )
       ) {
         return { ok: false, error: '해당 알림을 볼 수 없습니다.' };
       }
 
-      if (!notiRef.exists) {
+      if (!noti) {
         return { ok: false, error: '해당 알림이나 메시지가 없습니다.' };
       }
 
-      let docRef: FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>;
+      let product: NotiProduct;
       if (noti.type === 'coffee') {
-        docRef = await getFirestore()
-          .collection('coffees')
-          .doc(noti.product_id)
-          .get();
+        const { id, name, image_url } = await getD<Coffee>(
+          COFFEES,
+          noti.product_id,
+        );
+        product = { id, title: name, image: image_url };
       } else {
         return { ok: false, error: '찾을 상품의 종류가 없습니다.' };
       }
 
-      const product = {
-        id: docRef.id,
-        title: docRef.data().name,
-        image: docRef.data().image_url,
-      };
+      const sender = await getD<Company>(COMPANIES, noti.sender_id);
+      const recipient = await getD<Company>(COMPANIES, noti.recipient_id);
 
-      const sender = await getAsync<Company>(
-        getFirestore().collection(COMPANIES).doc(noti.sender_id),
-      );
-
-      const recipient = await getAsync<Company>(
-        getFirestore().collection(COMPANIES).doc(noti.recipient_id),
-      );
-
-      const senderCompany = {
+      const senderCompany: NotiCompany = {
         id: sender.id,
         company_name: sender.company_name,
         president_name: sender.president_name,
         telephone: sender.telephone,
       };
-      const recipientCompany = {
+      const recipientCompany: NotiCompany = {
         id: recipient.id,
         company_name: recipient.company_name,
         president_name: recipient.president_name,
