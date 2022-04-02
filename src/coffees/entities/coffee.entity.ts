@@ -45,8 +45,8 @@ export class Coffee extends CoreEntity {
   @Field(/* () => DocumentReference */)
   company: string; //DocumentReference
 
-  @Field({ nullable: true })
-  company_id?: string;
+  @Field()
+  company_id: string;
 
   // related_coffee: EntityReference[];
 

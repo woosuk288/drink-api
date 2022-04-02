@@ -10,7 +10,7 @@ import axios from 'axios';
 import { DecodedIdToken } from 'firebase-admin/lib/auth/token-verifier';
 import { getAuth } from 'firebase-admin/auth';
 import { UserRole } from 'src/auth/roles.decorator';
-import { CREATE } from 'src/firebase/util';
+import { CREATE, C_, getAsync } from 'src/firebase/util';
 
 const COMPANNIES = 'companies';
 const USERS = 'users';
@@ -100,10 +100,10 @@ export class CompaniesService {
       const newCompanyRef = await c.add(company);
       company.id = newCompanyRef.id;
       await getAuth().setCustomUserClaims(token.uid, {
-        Company: newCompanyRef.id,
+        Company: company.id,
       });
 
-      u.doc(token.uid).update({ company: newCompanyRef });
+      u.doc(token.uid).update({ company_id: company.id });
 
       console.log('company : ', company);
       return { ok: true, company, role: UserRole.Company };
@@ -120,8 +120,16 @@ export class CompaniesService {
     return `This action returns all companies`;
   }
 
-  async findOne(id: number) {
-    return `This action returns a #${id} company`;
+  async findOne(token: DecodedIdToken) {
+    try {
+      const company = await getAsync<Company>(
+        C_(COMPANNIES).doc(token.Company),
+      );
+
+      return { ok: true, company, UserRole: UserRole.Company };
+    } catch (error) {
+      return { ok: false, error: '회사 정보를 조회하는 중 오류 발생!' };
+    }
   }
 
   async update(id: number, updateCompanyInput: UpdateCompanyInput) {

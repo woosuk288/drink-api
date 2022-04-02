@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 import { CompaniesService } from './companies.service';
 import { Company } from './entities/company.entity';
 import { CreateCompanyInput } from './dto/create-company.input';
@@ -26,9 +26,10 @@ export class CompaniesResolver {
     return this.companiesService.findAll();
   }
 
-  @Query(() => Company, { name: 'company' })
-  findOne(@Args('id', { type: () => Int }) id: number) {
-    return this.companiesService.findOne(id);
+  @Role(['Login'])
+  @Query(() => CompanyOutput, { name: 'company' })
+  findOne(@AuthUser() token: DecodedIdToken) {
+    return this.companiesService.findOne(token);
   }
 
   @Mutation(() => Company)
