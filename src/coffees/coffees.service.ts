@@ -1,23 +1,33 @@
 import { Injectable } from '@nestjs/common';
-import { CreateCoffeeInput } from './dto/create-coffee.input';
-import { UpdateCoffeeInput } from './dto/update-coffee.input';
+import { COFFEES } from 'src/common/common.constants';
+import { C_, getArray, getAsync } from 'src/firebase/util';
+import { Coffee } from './entities/coffee.entity';
 
 @Injectable()
 export class CoffeesService {
-  create(createCoffeeInput: CreateCoffeeInput) {
-    return 'This action adds a new coffee';
+  async findAll() {
+    try {
+      const snaps = await C_(COFFEES)
+        .limit(12)
+        .orderBy('created_at', 'desc')
+        .get();
+
+      const coffees = getArray<Coffee>(snaps);
+
+      return { ok: true, coffees };
+    } catch (error) {
+      return { ok: false, error: '데이터를 조회하는 중 오류 발생!' };
+    }
   }
 
-  findAll() {
-    return `This action returns all coffees`;
-  }
+  async findOne(id: string) {
+    try {
+      const coffee = await getAsync<Coffee>(C_(COFFEES).doc(id));
 
-  findOne(id: number) {
-    return `This action returns a #${id} coffee`;
-  }
-
-  update(id: number, updateCoffeeInput: UpdateCoffeeInput) {
-    return `This action updates a #${id} coffee`;
+      return { ok: true, coffee };
+    } catch (error) {
+      return { ok: false, error: '데이터를 조회하는 중 오류 발생' };
+    }
   }
 
   remove(id: number) {

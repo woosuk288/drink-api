@@ -10,7 +10,7 @@ import {
 } from 'src/common/common.constants';
 import { User } from 'src/common/entities/user.entity';
 import { Company } from 'src/companies/entities/company.entity';
-import { getAsyncData, getData } from 'src/firebase/util';
+import { getAsync, getData } from 'src/firebase/util';
 import { CreateNotificationInput } from './dto/create-notification.input';
 import { NotificationInput } from './dto/notification.input';
 import { UpdateNotificationInput } from './dto/update-notification.input';
@@ -28,7 +28,7 @@ export class NotificationsService {
       const C = getFirestore().collection(COFFEES);
       let coffee: Coffee;
       if (type === 'coffee') {
-        coffee = await getAsyncData<Coffee>(C.doc(product_id));
+        coffee = await getAsync<Coffee>(C.doc(product_id));
       } else {
         return { ok: false, error: '찾을 상품의 종류가 없습니다.' };
       }
@@ -37,7 +37,7 @@ export class NotificationsService {
         coffee.company as unknown as DocumentReference;
 
       const U = getFirestore().collection(USERS);
-      const user = await getAsyncData<User>(U.doc(token.uid));
+      const user = await getAsync<User>(U.doc(token.uid));
       const senderCompanyRef = user.company as unknown as DocumentReference;
 
       const N = getFirestore().collection(NOTIFICATIONS);
@@ -69,7 +69,7 @@ export class NotificationsService {
   async findAll(token: DecodedIdToken) {
     try {
       const U = getFirestore().collection(USERS);
-      const user = await getAsyncData<User>(U.doc(token.uid));
+      const user = await getAsync<User>(U.doc(token.uid));
       const userCompanyRef = user.company as unknown as DocumentReference;
 
       const c = getFirestore().collection(NOTIFICATIONS);
@@ -98,7 +98,7 @@ export class NotificationsService {
     const { id } = notificationInput;
 
     const U = getFirestore().collection(USERS);
-    const user = await getAsyncData<User>(U.doc(token.uid));
+    const user = await getAsync<User>(U.doc(token.uid));
     const senderCompanyRef = user.company as unknown as DocumentReference;
 
     try {
@@ -134,14 +134,14 @@ export class NotificationsService {
       const product = {
         id: docRef.id,
         title: docRef.data().name,
-        image: docRef.data().main_image,
+        image: docRef.data().image_url,
       };
 
-      const sender = await getAsyncData<Company>(
+      const sender = await getAsync<Company>(
         getFirestore().collection(COMPANIES).doc(noti.sender_id),
       );
 
-      const recipient = await getAsyncData<Company>(
+      const recipient = await getAsync<Company>(
         getFirestore().collection(COMPANIES).doc(noti.recipient_id),
       );
 

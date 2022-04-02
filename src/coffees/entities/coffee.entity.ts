@@ -1,46 +1,43 @@
-import { ObjectType, Field, Int } from '@nestjs/graphql';
+import { ObjectType, Field } from '@nestjs/graphql';
+import { CoreEntity } from 'src/common/entities/core.entity';
 
 @ObjectType()
-export class Coffee {
-  @Field(() => Int, { description: 'Example field (placeholder)' })
-  exampleField: number;
-
-  @Field()
-  id: string;
-
+export class Coffee extends CoreEntity {
   @Field()
   name: string;
 
   @Field()
-  main_image: string;
+  image_url: string;
 
   @Field()
   description: string;
+
+  @Field(() => [String], { defaultValue: [] })
   tags: string[];
 
-  @Field()
-  taste_body: string;
+  @Field({ nullable: true })
+  taste_body?: string;
 
-  @Field()
-  taste_sweet: string;
+  @Field({ nullable: true })
+  taste_sweet?: string;
 
-  @Field()
-  taste_bitter: string;
+  @Field({ nullable: true })
+  taste_bitter?: string;
 
-  @Field()
-  taste_sour: string;
+  @Field({ nullable: true })
+  taste_sour?: string;
 
-  @Field()
-  type: string;
+  @Field({ nullable: true })
+  type?: string;
 
-  @Field()
-  roasting: string;
+  @Field({ nullable: true })
+  roasting?: string;
 
-  @Field()
-  roasting_date: Date;
+  @Field({ nullable: true })
+  roasting_date?: Date;
 
-  @Field()
-  process: string;
+  @Field({ nullable: true })
+  process?: string;
 
   @Field(() => Boolean)
   public: boolean;
@@ -48,14 +45,11 @@ export class Coffee {
   @Field(/* () => DocumentReference */)
   company: string; //DocumentReference
 
-  @Field()
-  company_id: string;
+  @Field({ nullable: true })
+  company_id?: string;
 
   // related_coffee: EntityReference[];
 
-  @Field()
-  uid: string;
-
-  @Field()
-  created_at: Date;
+  @Field({ nullable: true })
+  uid?: string;
 }

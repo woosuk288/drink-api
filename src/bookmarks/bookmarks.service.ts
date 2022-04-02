@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { DecodedIdToken } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
-import { CREATE } from 'src/common/common.constants';
+import { CREATE } from 'src/firebase/util';
+
 import { CreateBookmarkInput } from './dto/create-bookmark.input';
 
 const BOOKMARKS = 'bookmarks';

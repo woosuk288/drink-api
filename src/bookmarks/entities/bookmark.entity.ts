@@ -17,7 +17,7 @@ export class Bookmark extends CoreEntity {
   description: string;
 
   @Field(() => String, { description: '이미지' })
-  main_image: string;
+  image_url: string;
 
   @Field(() => [String], { description: '태그' })
   tags: string[];

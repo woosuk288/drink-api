@@ -4,13 +4,13 @@ import { UpdateCompanyInput } from './dto/update-company.input';
 
 // import { db } from 'src/firebase/firebase.module';
 import { getFirestore } from 'firebase-admin/firestore';
-import { CREATE } from 'src/common/common.constants';
 import { Company } from './entities/company.entity';
 import { CompanyOutput } from './dto/company.output';
 import axios from 'axios';
 import { DecodedIdToken } from 'firebase-admin/lib/auth/token-verifier';
 import { getAuth } from 'firebase-admin/auth';
 import { UserRole } from 'src/auth/roles.decorator';
+import { CREATE } from 'src/firebase/util';
 
 const COMPANNIES = 'companies';
 const USERS = 'users';
