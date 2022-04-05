@@ -10,6 +10,7 @@ import { BookmarksModule } from './bookmarks/bookmarks.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { CoffeesModule } from './coffees/coffees.module';
 import { PostsModule } from './posts/posts.module';
+import { PaymentsModule } from './payments/payments.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { PostsModule } from './posts/posts.module';
     NotificationsModule,
     CoffeesModule,
     PostsModule,
+    PaymentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
