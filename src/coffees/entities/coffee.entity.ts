@@ -13,6 +13,9 @@ export class Coffee extends CoreEntity {
   description: string;
 
   @Field(() => [String], { defaultValue: [] })
+  flavors: string[];
+
+  @Field(() => [String], { defaultValue: [] })
   tags: string[];
 
   @Field({ nullable: true })
