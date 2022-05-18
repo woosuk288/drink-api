@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CreateCompanyInput } from './dto/create-company.input';
+import { CreateCompanyInput, RegisterInput } from './dto/create-company.input';
 
 // import { db } from 'src/firebase/firebase.module';
 import { getFirestore } from 'firebase-admin/firestore';
@@ -140,5 +140,36 @@ export class CompaniesService {
 
     // await getAuth().setCustomUserClaims(token.uid, null);
     return `This action removes a #${token.uid} company`;
+  }
+
+  async registerTest(registerInput: RegisterInput) {
+    try {
+      if (registerInput.contact.length < 11) {
+        return { ok: false, error: '요청 갑싱 잘못되었습니다.' };
+      }
+
+      const c = getFirestore().collection('registers');
+
+      const queryOne = await c
+        .where('contact', '==', registerInput.contact)
+        .limit(1)
+        .get();
+
+      if (queryOne.size > 0) {
+        return { ok: false, error: '이미 신청을 완료하셨습니다.' };
+      }
+
+      const query = await c.where('ip', '==', registerInput.ip).limit(11).get();
+
+      if (query.size > 10) {
+        return { ok: false, error: '요청 횟수를 초과했습니다.' };
+      }
+
+      await c.add({ ...registerInput, ...CREATE() });
+
+      return { ok: true };
+    } catch (error) {
+      return { ok: false, error: '등록 중 오류가 발생했습니다.' };
+    }
   }
 }
