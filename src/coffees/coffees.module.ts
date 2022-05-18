@@ -3,6 +3,6 @@ import { CoffeesService } from './coffees.service';
 import { CoffeesResolver } from './coffees.resolver';
 
 @Module({
-  providers: [CoffeesResolver, CoffeesService]
+  providers: [CoffeesResolver, CoffeesService],
 })
 export class CoffeesModule {}

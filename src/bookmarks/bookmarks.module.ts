@@ -3,6 +3,6 @@ import { BookmarksService } from './bookmarks.service';
 import { BookmarksResolver } from './bookmarks.resolver';
 
 @Module({
-  providers: [BookmarksResolver, BookmarksService]
+  providers: [BookmarksResolver, BookmarksService],
 })
 export class BookmarksModule {}
