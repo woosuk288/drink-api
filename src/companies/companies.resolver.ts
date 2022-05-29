@@ -48,4 +48,9 @@ export class CompaniesResolver {
   registerTest(@Args('input') registerInput: RegisterInput) {
     return this.companiesService.registerTest(registerInput);
   }
+
+  @Query(() => CoreOutput)
+  crawlingKoke() {
+    return this.companiesService.crawlingKoke();
+  }
 }
