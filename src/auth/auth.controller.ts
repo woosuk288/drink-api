@@ -59,7 +59,7 @@ export class AuthController {
     } catch (error) {
       console.log('error : ', error);
 
-      return { ok: true, error: '로그인 처리 중 오류가 발생했습니다.' };
+      return { ok: false, error: '로그인 처리 중 오류가 발생했습니다.' };
     }
   }
 
