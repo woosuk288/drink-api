@@ -12,7 +12,7 @@
     "start": "nest start",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
-    "start:dev": "export GOOGLE_APPLICATION_CREDENTIALS=serviceAccount.json && cross-env NODE_ENV=dev nest start --watch",
+    "start:dev": "cross-env NODE_ENV=dev nest start --watch",
     "deploy": "firebase deploy --only functions:api",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",

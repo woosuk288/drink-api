@@ -7,9 +7,12 @@ import 'firebase-functions';
 import { AppModule } from './app.module';
 import * as firebaseAdmin from 'firebase-admin';
 import * as functions from 'firebase-functions';
-import { firebaseConfig } from './firebase/config';
 import * as express from 'express';
 import { join } from 'path';
+import { BUCKET_NAME, PROJECT_ID } from './common/common.constants';
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const serviceAccount = require('../serviceAccount.json');
 
 const server = express();
 
@@ -21,7 +24,12 @@ export const createNestServer = async (expressInstance) => {
   );
 
   // Initialize the firebase admin app
-  firebaseAdmin.initializeApp(firebaseConfig);
+  firebaseAdmin.initializeApp({
+    credential: firebaseAdmin.credential.cert(serviceAccount),
+    databaseURL: 'https://<DATABASE_NAME>.firebaseio.com',
+    storageBucket: BUCKET_NAME,
+    projectId: PROJECT_ID,
+  });
 
   app.enableCors();
   // app.useStaticAssets(join(__dirname, '..', 'src', 'public'));
